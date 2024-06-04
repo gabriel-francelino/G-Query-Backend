@@ -2,6 +2,7 @@ package com.elasticsearch.search.controller;
 
 import com.elasticsearch.search.api.facade.SearchApi;
 import com.elasticsearch.search.api.model.Result;
+import com.elasticsearch.search.api.model.ResultList;
 import com.elasticsearch.search.service.SearchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,7 +22,7 @@ public class SearchController implements SearchApi {
     }
 
     @Override
-    public CompletableFuture<ResponseEntity<List<Result>>> search(String query) {
+    public CompletableFuture<ResponseEntity<ResultList>> search(String query) {
         var result = searchService.submitQuery(query);
         return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(result));
     }

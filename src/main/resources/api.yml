@@ -23,9 +23,9 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Result'
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ResultList'
         500:
           description: Unexpected error
           content:
@@ -34,6 +34,21 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    ResultList:
+      type: object
+      properties:
+        total_hits:
+          type: integer
+        total_pages:
+          type: integer
+        suggestion:
+          type: string
+        search_time:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Result'
     Result:
       type: object
       properties:
@@ -43,9 +58,8 @@ components:
           type: string
         abs:
           type: string
-        isFavorite:
-          type: boolean
-          default: false
+        reading_time:
+          type: integer
     Error:
       type: object
       required:

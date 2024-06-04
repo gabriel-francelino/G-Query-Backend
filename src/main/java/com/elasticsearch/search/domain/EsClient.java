@@ -1,6 +1,7 @@
 package com.elasticsearch.search.domain;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -23,6 +24,7 @@ import java.io.IOException;
 @Component
 public class EsClient {
     private ElasticsearchClient elasticsearchClient;
+    public final static int PAGE_SIZE = 10;
 
     public EsClient() {
         createConnection();
@@ -63,7 +65,7 @@ public class EsClient {
         SearchResponse<ObjectNode> response;
         try {
             response = elasticsearchClient.search(s -> s
-                .index("wikipedia").from(0).size(10)
+                .index("wikipedia").from(0).size(PAGE_SIZE)
                 .query(matchQuery), ObjectNode.class
             );
         } catch (IOException e) {
