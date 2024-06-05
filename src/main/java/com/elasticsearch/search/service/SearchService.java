@@ -24,28 +24,30 @@ public class SearchService {
         var searchResponse = esClient.search(query);
 
         var hitsList = searchResponse.hits();
-        int totalHits = (int) hitsList.total().value();
+        int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
         int totalPages = (int) Math.ceil((double) totalHits / EsClient.PAGE_SIZE);
         var searchTime = (int) searchResponse.took();
         List<Hit<ObjectNode>> hits = hitsList.hits();
 //        List<Hit<ObjectNode>> hits = searchResponse.hits().hits();
 
-        var results = hits.stream().map(h ->
-                new Result()
-                        .abs(treatContent(h.source().get("content").asText()))
-                        .title(h.source().get("title").asText())
-                        .url(h.source().get("url").asText())
-                        .readingTime(h.source().get("reading_time").asInt())
+        var results = hits.stream().map(h -> {
+                    if (h.source() != null) {
+                        return new Result()
+                                .abs(treatContent(h.source().get("content").asText()))
+                                .title(h.source().get("title").asText())
+                                .url(h.source().get("url").asText())
+                                .readingTime(h.source().get("reading_time").asInt());
+                    }
+                    return new Result();
+                }
         ).collect(Collectors.toList());
 
-        ResultList resultList = new ResultList()
+        return new ResultList()
                 .searchTime(searchTime)
                 .totalHits(totalHits)
                 .totalPages(totalPages)
                 .suggestion("TODO")
                 .results(results);
-
-        return resultList;
     }
 
     private String treatContent(String content) {
