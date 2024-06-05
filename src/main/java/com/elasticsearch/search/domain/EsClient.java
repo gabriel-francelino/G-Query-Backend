@@ -58,14 +58,17 @@ public class EsClient {
         elasticsearchClient = new co.elastic.clients.elasticsearch.ElasticsearchClient(transport);
     }
 
-    public SearchResponse search(String query) {
+    public SearchResponse search(String query, Integer pageNumber) {
         Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
 
         SearchResponse<ObjectNode> response;
+        Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
         try {
             response = elasticsearchClient.search(s -> s
-                .index("wikipedia").from(0).size(PAGE_SIZE)
-                .query(matchQuery), ObjectNode.class
+                    .index("wikipedia")
+                    .from(currencyPage)
+                    .size(PAGE_SIZE)
+                    .query(matchQuery), ObjectNode.class
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
