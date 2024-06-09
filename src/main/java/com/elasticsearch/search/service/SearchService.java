@@ -1,6 +1,8 @@
 package com.elasticsearch.search.service;
 
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.core.search.Suggestion;
 import com.elasticsearch.search.api.model.Result;
 import com.elasticsearch.search.api.model.ResultList;
 import com.elasticsearch.search.domain.EsClient;
@@ -9,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +25,7 @@ public class SearchService {
     }
 
     public ResultList submitQuery(String query, Integer pageNumber) {
+
         pageNumber = Util.validatePageNumber(pageNumber);
         var searchResponse = esClient.search(query, pageNumber);
 
@@ -31,6 +35,8 @@ public class SearchService {
         var searchTime = (int) searchResponse.took();
         List<Hit<ObjectNode>> hits = hitsList.hits();
 //        List<Hit<ObjectNode>> hits = searchResponse.hits().hits();
+
+        String suggest = getSuggestion(searchResponse);
 
         var results = hits.stream().map(h -> {
                     if (h.source() != null) {
@@ -48,8 +54,23 @@ public class SearchService {
                 .searchTime(searchTime)
                 .totalHits(totalHits)
                 .totalPages(totalPages)
-                .suggestion("TODO")
+                .suggestion(suggest)
                 .results(results);
+    }
+
+    private String getSuggestion(SearchResponse searchResponse) {
+        Map<String, List<Suggestion>> suggestion = searchResponse.suggest();
+
+        var suggestionList = suggestion
+                .get("suggest_phrase")
+                .get(0)
+                .phrase()
+                .options();
+
+        if (suggestionList.isEmpty())
+            return "";
+
+        return suggestionList.get(0).highlighted();
     }
 
     private String treatContent(String content) {
