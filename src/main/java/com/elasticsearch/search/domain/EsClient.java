@@ -1,6 +1,8 @@
 package com.elasticsearch.search.domain;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -8,6 +10,7 @@ import co.elastic.clients.elasticsearch.core.search.Suggester;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.elasticsearch.search.utils.Util;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.altindag.ssl.SSLFactory;
 import org.apache.http.HttpHost;
@@ -20,6 +23,8 @@ import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EsClient {
@@ -62,14 +67,7 @@ public class EsClient {
     public SearchResponse search(String query, Integer pageNumber) {
         Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
 
-        Suggester phraseSuggestion = Suggester.of(s -> s.suggesters("suggest_phrase", ts -> ts
-                .text(query)
-                .phrase(p -> p
-                        .field("content")
-                        .size(1)
-                        .highlight(h -> h
-                                .preTag("<em>")
-                                .postTag("</em>")))));
+        Suggester phraseSuggestion = getPhraseSuggestion(query);
 
         SearchResponse<ObjectNode> response;
         Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
@@ -87,5 +85,60 @@ public class EsClient {
         }
 
         return response;
+    }
+
+    public SearchResponse searchWithMatchPhrase(String query, Integer pageNumber) {
+        SearchResponse<ObjectNode> response;
+        Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
+
+        Suggester phraseSuggestion = getPhraseSuggestion(query);
+
+        Query boolQuery = generateQuery(query);
+
+        try {
+            response = elasticsearchClient.search(s -> s
+                    .index("wikipedia")
+                    .from(currencyPage)
+                    .size(PAGE_SIZE)
+                    .query(boolQuery)
+                    .suggest(phraseSuggestion), ObjectNode.class
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return response;
+    }
+
+    private Query generateQuery(String query) {
+        Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
+        List<String> phrases = Util.containsMatchPhrase(query);
+
+        if (!phrases.isEmpty()) {
+            List<Query> queries = new ArrayList<>();
+
+            for (String phrase : phrases) {
+                Query matchPhraseQuery = MatchPhraseQuery.of(
+                        m -> m.field("content").query(phrase)
+                )._toQuery();
+
+                queries.add(matchPhraseQuery);
+            }
+
+            return BoolQuery.of(b -> b.must(queries).should(matchQuery))._toQuery();
+        }
+
+        return BoolQuery.of(b -> b.must(matchQuery))._toQuery();
+    }
+
+    private Suggester getPhraseSuggestion(String query) {
+        return Suggester.of(s -> s.suggesters("suggest_phrase", ts -> ts
+                .text(query)
+                .phrase(p -> p
+                        .field("content")
+                        .size(1)
+                        .highlight(h -> h
+                                .preTag("<em>")
+                                .postTag("</em>")))));
     }
 }

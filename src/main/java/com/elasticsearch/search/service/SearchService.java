@@ -27,7 +27,7 @@ public class SearchService {
     public ResultList submitQuery(String query, Integer pageNumber) {
 
         pageNumber = Util.validatePageNumber(pageNumber);
-        var searchResponse = esClient.search(query, pageNumber);
+        var searchResponse = esClient.searchWithMatchPhrase(query, pageNumber);
 
         var hitsList = searchResponse.hits();
         int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
