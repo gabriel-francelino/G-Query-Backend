@@ -93,14 +93,15 @@ public class EsClient {
 
         Suggester phraseSuggestion = getPhraseSuggestion(query);
 
-        Query boolQuery = generateQuery(query);
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        generateQuery(boolQueryBuilder, query);
 
         try {
             response = elasticsearchClient.search(s -> s
                     .index("wikipedia")
                     .from(currencyPage)
                     .size(PAGE_SIZE)
-                    .query(boolQuery)
+                    .query(q -> q.bool(boolQueryBuilder.build()))
                     .suggest(phraseSuggestion), ObjectNode.class
             );
         } catch (IOException e) {
@@ -110,7 +111,7 @@ public class EsClient {
         return response;
     }
 
-    private Query generateQuery(String query) {
+    private void generateQuery(BoolQuery.Builder boolQuery, String query) {
         Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
         List<String> phrases = Util.containsMatchPhrase(query);
 
@@ -125,10 +126,12 @@ public class EsClient {
                 queries.add(matchPhraseQuery);
             }
 
-            return BoolQuery.of(b -> b.must(queries).should(matchQuery))._toQuery();
+            boolQuery.must(queries);
+            boolQuery.should(matchQuery);
+            //return BoolQuery.of(b -> b.must(queries).should(matchQuery))._toQuery();
         }
-
-        return BoolQuery.of(b -> b.must(matchQuery))._toQuery();
+        boolQuery.must(matchQuery);
+        //return BoolQuery.of(b -> b.must(matchQuery))._toQuery();
     }
 
     private Suggester getPhraseSuggestion(String query) {
