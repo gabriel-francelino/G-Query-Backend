@@ -6,6 +6,8 @@ import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Highlight;
+import co.elastic.clients.elasticsearch.core.search.HighlightField;
 import co.elastic.clients.elasticsearch.core.search.Suggester;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
@@ -24,7 +26,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class EsClient {
@@ -95,13 +99,27 @@ public class EsClient {
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         generateQuery(boolQueryBuilder, query);
+        Query queryCompleted = boolQueryBuilder.build()._toQuery();
+
+        Highlight.Builder highlightBuilder = new Highlight.Builder();
+        HighlightField.Builder highlightField = new HighlightField.Builder();
+        Map<String, HighlightField> map = new HashMap<>();
+        map.put("content", highlightField.build());
+        highlightBuilder
+                .preTags("<strong>")
+                .postTags("</strong>")
+                .numberOfFragments(1)
+                .fragmentSize(500)
+                .fields(map)
+                .highlightQuery(queryCompleted);
 
         try {
             response = elasticsearchClient.search(s -> s
                     .index("wikipedia")
                     .from(currencyPage)
                     .size(PAGE_SIZE)
-                    .query(q -> q.bool(boolQueryBuilder.build()))
+                    .query(queryCompleted)
+                    .highlight(highlightBuilder.build())
                     .suggest(phraseSuggestion), ObjectNode.class
             );
         } catch (IOException e) {
@@ -120,7 +138,7 @@ public class EsClient {
 
             for (String phrase : phrases) {
                 Query matchPhraseQuery = MatchPhraseQuery.of(
-                        m -> m.field("content").query(phrase)
+                        m -> m.field("content").query(phrase).slop(1)
                 )._toQuery();
 
                 queries.add(matchPhraseQuery);
@@ -129,19 +147,21 @@ public class EsClient {
             boolQuery.must(queries);
             boolQuery.should(matchQuery);
             //return BoolQuery.of(b -> b.must(queries).should(matchQuery))._toQuery();
+        } else {
+            boolQuery.must(matchQuery);
+            //return BoolQuery.of(b -> b.must(matchQuery))._toQuery();
         }
-        boolQuery.must(matchQuery);
-        //return BoolQuery.of(b -> b.must(matchQuery))._toQuery();
     }
 
     private Suggester getPhraseSuggestion(String query) {
-        return Suggester.of(s -> s.suggesters("suggest_phrase", ts -> ts
+        return Suggester.of(s -> s
+                .suggesters("suggest_phrase", ts -> ts
                 .text(query)
                 .phrase(p -> p
                         .field("content")
                         .size(1)
                         .highlight(h -> h
-                                .preTag("<em>")
-                                .postTag("</em>")))));
+                                .preTag("<strong><em>")
+                                .postTag("</em></strong>")))));
     }
 }

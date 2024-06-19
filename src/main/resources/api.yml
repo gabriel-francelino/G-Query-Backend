@@ -63,6 +63,8 @@ components:
           type: string
         abs:
           type: string
+        highlight:
+          type: string
         reading_time:
           type: integer
     Error:

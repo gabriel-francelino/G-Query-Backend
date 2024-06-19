@@ -44,7 +44,8 @@ public class SearchService {
                                 .abs(treatContent(h.source().get("content").asText()))
                                 .title(h.source().get("title").asText())
                                 .url(h.source().get("url").asText())
-                                .readingTime(h.source().get("reading_time").asInt());
+                                .readingTime(h.source().get("reading_time").asInt())
+                                .highlight(h.highlight().get("content").get(0));
                     }
                     return new Result();
                 }
