@@ -22,7 +22,7 @@ public class Util {
         boolean filter1 = query.getFilterReadingTime();
         boolean filter2 = query.getFilterDateCreation();
 
-        return !filter1 || !filter2;
+        return filter1 || filter2;
     }
 
     public static Filter createFilterClass(QueryParameter query) {
@@ -65,6 +65,9 @@ public class Util {
     }
 
     private static boolean validateFilterValues(String date) {
+        if (date == null || date.isBlank())
+            return false;
+
         return date.matches("\\d{4}-\\d{2}-\\d{2}");
     }
 
