@@ -1,17 +1,16 @@
 package com.elasticsearch.search.domain;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Highlight;
 import co.elastic.clients.elasticsearch.core.search.HighlightField;
 import co.elastic.clients.elasticsearch.core.search.Suggester;
+import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.elasticsearch.search.api.model.QueryParameter;
 import com.elasticsearch.search.utils.Util;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.altindag.ssl.SSLFactory;
@@ -68,7 +67,9 @@ public class EsClient {
         elasticsearchClient = new co.elastic.clients.elasticsearch.ElasticsearchClient(transport);
     }
 
-    public SearchResponse search(String query, Integer pageNumber) {
+    public SearchResponse search(QueryParameter queryParameter) {
+        String query = queryParameter.getQuery();
+        Integer pageNumber = queryParameter.getPageNumber();
         Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
 
         Suggester phraseSuggestion = getPhraseSuggestion(query);
@@ -91,7 +92,10 @@ public class EsClient {
         return response;
     }
 
-    public SearchResponse searchWithMatchPhrase(String query, Integer pageNumber) {
+    public SearchResponse searchWithMatchPhrase(QueryParameter queryParameter) {
+        String query = queryParameter.getQuery();
+        Integer pageNumber = Util.validatePageNumber(queryParameter.getPageNumber());
+
         SearchResponse<ObjectNode> response;
         Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
 
@@ -99,6 +103,12 @@ public class EsClient {
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         generateQuery(boolQueryBuilder, query);
+
+        if (Util.hasFilter(queryParameter)) {
+            Filter filter = Util.createFilterClass(queryParameter);
+            generateFilterQuery(boolQueryBuilder, filter);
+        }
+
         Query queryCompleted = boolQueryBuilder.build()._toQuery();
 
         Highlight.Builder highlightBuilder = new Highlight.Builder();
@@ -127,6 +137,43 @@ public class EsClient {
         }
 
         return response;
+    }
+
+    private void generateFilterQuery(BoolQuery.Builder boolQuery, Filter filter) {
+//        RangeQuery.Builder rangeQuery = new RangeQuery.Builder();
+        List<Query> filters = new ArrayList<>();
+
+        if (filter.fields().contains("reading_time")) {
+//            Query filter1 = rangeQuery
+//                    .field("reading_time")
+//                    .gte(JsonData.of(filter.minValue()))
+//                    .lte(JsonData.of(filter.maxValue()))
+//                    .build()._toQuery();
+
+            Query filter1 = RangeQuery.of(r -> r
+                    .field("reading_time")
+                    .gte(JsonData.of(filter.minValue()))
+                    .lte(JsonData.of(filter.maxValue()))
+            )._toQuery();
+            filters.add(filter1);
+        }
+
+        if (filter.fields().contains("dt_creation")) {
+//            Query filter2 = rangeQuery
+//                    .field("dt_creation")
+//                    .gte(JsonData.of(filter.minDate()))
+//                    .lte(JsonData.of(filter.maxDate()))
+//                    .build()._toQuery();
+
+            Query filter2 = RangeQuery.of(r -> r
+                    .field("dt_creation")
+                    .gte(JsonData.of(filter.minDate()))
+                    .lte(JsonData.of(filter.maxDate()))
+            )._toQuery();
+            filters.add(filter2);
+        }
+
+        boolQuery.filter(filters);
     }
 
     private void generateQuery(BoolQuery.Builder boolQuery, String query) {

@@ -1,6 +1,7 @@
 package com.elasticsearch.search.controller;
 
 import com.elasticsearch.search.api.facade.SearchApi;
+import com.elasticsearch.search.api.model.QueryParameter;
 import com.elasticsearch.search.api.model.ResultList;
 import com.elasticsearch.search.service.SearchService;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,8 @@ public class SearchController implements SearchApi {
     }
 
     @Override
-    public CompletableFuture<ResponseEntity<ResultList>> search(String query, Integer pageNumber) {
-        var result = searchService.submitQuery(query, pageNumber);
+    public CompletableFuture<ResponseEntity<ResultList>> search(QueryParameter queryParameter) {
+        var result = searchService.submitQuery(queryParameter);
         return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(result));
     }
 }

@@ -6,6 +6,7 @@ import co.elastic.clients.elasticsearch.core.search.Suggestion;
 import com.elasticsearch.search.api.model.Result;
 import com.elasticsearch.search.api.model.ResultList;
 import com.elasticsearch.search.domain.EsClient;
+import com.elasticsearch.search.api.model.QueryParameter;
 import com.elasticsearch.search.utils.Util;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,8 @@ public class SearchService {
         this.esClient = esClient;
     }
 
-    public ResultList submitQuery(String query, Integer pageNumber) {
-
-        pageNumber = Util.validatePageNumber(pageNumber);
-        var searchResponse = esClient.searchWithMatchPhrase(query, pageNumber);
+    public ResultList submitQuery(QueryParameter queryParameter) {
+        var searchResponse = esClient.searchWithMatchPhrase(queryParameter);
 
         var hitsList = searchResponse.hits();
         int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
@@ -45,6 +44,7 @@ public class SearchService {
                                 .title(h.source().get("title").asText())
                                 .url(h.source().get("url").asText())
                                 .readingTime(h.source().get("reading_time").asInt())
+                                .dateCreation(h.source().get("dt_creation").asText())
                                 .highlight(h.highlight().get("content").get(0));
                     }
                     return new Result();

@@ -12,16 +12,42 @@ paths:
       tags:
         - search
       parameters:
-        - name: query
+        - name: queryParameter
+          description: Object query to be submitted
           in: query
-          description: Query to be submitted
           schema:
-            type: string
-        - name: pageNumber
-          in: query
-          description: Page number
-          schema:
-            type: integer
+              type: object
+              properties:
+                query:
+                    type: string
+                pageNumber:
+                    type: integer
+                filterReadingTime:
+                    type: boolean
+                    default: false
+                filterDateCreation:
+                    type: boolean
+                    default: false
+                filterMinValue:
+                    type: integer
+                    default: 0
+                filterMaxValue:
+                    type: integer
+                    default: 999999
+                filterMinDate:
+                    type: string
+                filterMaxDate:
+                    type: string
+      #        - name: query
+#          in: query
+#          description: Query to be submitted
+#          schema:
+#            type: string
+#        - name: pageNumber
+#          in: query
+#          description: Page number
+#          schema:
+#            type: integer
       responses:
         200:
           description: OK
@@ -67,6 +93,8 @@ components:
           type: string
         reading_time:
           type: integer
+        date_creation:
+          type: string
     Error:
       type: object
       required:
