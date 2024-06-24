@@ -26,7 +26,7 @@ public class SearchService {
     }
 
     public ResultList submitQuery(QueryParameter queryParameter) {
-        var searchResponse = esClient.searchWithMatchPhrase(queryParameter);
+        var searchResponse = esClient.search(queryParameter);
 
         var hitsList = searchResponse.hits();
         int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);

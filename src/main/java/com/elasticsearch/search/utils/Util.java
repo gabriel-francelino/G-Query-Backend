@@ -31,7 +31,7 @@ public class Util {
             fields.add("reading_time");
         }
         if (query.getFilterDateCreation()) {
-            fields.add("date_creation");
+            fields.add("dt_creation");
         }
 
         if (!validateFilterValues(query.getFilterMinValue()))
@@ -44,9 +44,7 @@ public class Util {
             query.setFilterMinDate("0000-00-00");
 
         if (!validateFilterValues(query.getFilterMaxDate())) {
-            // Pegar data atual no formato aaaa-mm-dd
             LocalDate date = LocalDate.now();
-            // salvar no formato aaaa-mm-dd
             query.setFilterMaxDate(date.toString());
         }
 

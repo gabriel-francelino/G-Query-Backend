@@ -1,7 +1,6 @@
 package com.elasticsearch.search.domain;
 
 import lombok.Builder;
-import lombok.ToString;
 
 import java.util.List;
 

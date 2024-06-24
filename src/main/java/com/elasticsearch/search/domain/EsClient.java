@@ -67,32 +67,32 @@ public class EsClient {
         elasticsearchClient = new co.elastic.clients.elasticsearch.ElasticsearchClient(transport);
     }
 
+//    public SearchResponse search(QueryParameter queryParameter) {
+//        String query = queryParameter.getQuery();
+//        Integer pageNumber = queryParameter.getPageNumber();
+//        Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
+//
+//        Suggester phraseSuggestion = getPhraseSuggestion(query);
+//
+//        SearchResponse<ObjectNode> response;
+//        Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
+//
+//        try {
+//            response = elasticsearchClient.search(s -> s
+//                    .index("wikipedia")
+//                    .from(currencyPage)
+//                    .size(PAGE_SIZE)
+//                    .query(matchQuery)
+//                    .suggest(phraseSuggestion), ObjectNode.class
+//            );
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return response;
+//    }
+
     public SearchResponse search(QueryParameter queryParameter) {
-        String query = queryParameter.getQuery();
-        Integer pageNumber = queryParameter.getPageNumber();
-        Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
-
-        Suggester phraseSuggestion = getPhraseSuggestion(query);
-
-        SearchResponse<ObjectNode> response;
-        Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
-
-        try {
-            response = elasticsearchClient.search(s -> s
-                    .index("wikipedia")
-                    .from(currencyPage)
-                    .size(PAGE_SIZE)
-                    .query(matchQuery)
-                    .suggest(phraseSuggestion), ObjectNode.class
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return response;
-    }
-
-    public SearchResponse searchWithMatchPhrase(QueryParameter queryParameter) {
         String query = queryParameter.getQuery();
         Integer pageNumber = Util.validatePageNumber(queryParameter.getPageNumber());
 
@@ -140,16 +140,9 @@ public class EsClient {
     }
 
     private void generateFilterQuery(BoolQuery.Builder boolQuery, Filter filter) {
-//        RangeQuery.Builder rangeQuery = new RangeQuery.Builder();
         List<Query> filters = new ArrayList<>();
 
         if (filter.fields().contains("reading_time")) {
-//            Query filter1 = rangeQuery
-//                    .field("reading_time")
-//                    .gte(JsonData.of(filter.minValue()))
-//                    .lte(JsonData.of(filter.maxValue()))
-//                    .build()._toQuery();
-
             Query filter1 = RangeQuery.of(r -> r
                     .field("reading_time")
                     .gte(JsonData.of(filter.minValue()))
@@ -159,12 +152,6 @@ public class EsClient {
         }
 
         if (filter.fields().contains("dt_creation")) {
-//            Query filter2 = rangeQuery
-//                    .field("dt_creation")
-//                    .gte(JsonData.of(filter.minDate()))
-//                    .lte(JsonData.of(filter.maxDate()))
-//                    .build()._toQuery();
-
             Query filter2 = RangeQuery.of(r -> r
                     .field("dt_creation")
                     .gte(JsonData.of(filter.minDate()))
