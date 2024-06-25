@@ -6,6 +6,27 @@ info:
 
 paths:
   /search/fav:
+    get:
+      summary: 'Retrieves the favorite list'
+      operationId: search-fav
+      tags:
+        - search-fav
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/ResultList'
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /search/fav/:
     post:
       summary: 'Submits a document to favorite list'
       operationId: favorite
@@ -20,6 +41,10 @@ paths:
       responses:
         200:
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultList'
         500:
           description: Unexpected error
           content:

@@ -92,6 +92,42 @@ public class EsClient {
 //        return response;
 //    }
 
+    public void favoriteDocument(String id) {
+        try {
+            Query matchQuery = MatchQuery.of(q -> q.field("_id").query(id))._toQuery();
+
+            elasticsearchClient.reindex(r -> r
+                    .source(s -> s
+                            .index("wikipedia")
+                            .query(matchQuery))
+                    .dest(d -> d
+                            .index("wikipedia_fav")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void unfavoriteDocument(String id) {
+        try {
+            Query matchQuery = MatchQuery.of(q -> q.field("_id").query(id))._toQuery();
+
+            elasticsearchClient.deleteByQuery(d -> d
+                    .index("wikipedia_fav")
+                    .query(matchQuery));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public SearchResponse searchFavorites() {
+        try {
+            return elasticsearchClient.search(s -> s
+                    .index("wikipedia_fav"), ObjectNode.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public SearchResponse search(QueryParameter queryParameter) {
         String query = queryParameter.getQuery();
         Integer pageNumber = Util.validatePageNumber(queryParameter.getPageNumber());

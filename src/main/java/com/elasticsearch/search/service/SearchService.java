@@ -24,6 +24,44 @@ public class SearchService {
         this.esClient = esClient;
     }
 
+    public void favoriteDocument(String id) {
+        esClient.favoriteDocument(id);
+    }
+
+    public void unfavoriteDocument(String id) {
+        esClient.unfavoriteDocument(id);
+    }
+
+    public ResultList searchFavorites() {
+        var searchResponse = esClient.searchFavorites();
+
+        var hitsList = searchResponse.hits();
+        int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
+        int totalPages = (int) Math.ceil((double) totalHits / EsClient.PAGE_SIZE);
+        var searchTime = (int) searchResponse.took();
+        List<Hit<ObjectNode>> hits = hitsList.hits();
+
+        var results = hits.stream().map(h -> {
+                    if (h.source() != null) {
+                        return new Result()
+                                .id(h.id())
+                                .abs(treatContent(h.source().get("content").asText()))
+                                .title(h.source().get("title").asText())
+                                .url(h.source().get("url").asText())
+                                .readingTime(h.source().get("reading_time").asInt())
+                                .dateCreation(h.source().get("dt_creation").asText());
+                    }
+                    return new Result();
+                }
+        ).collect(Collectors.toList());
+
+        return new ResultList()
+                .searchTime(searchTime)
+                .totalHits(totalHits)
+                .totalPages(totalPages)
+                .results(results);
+    }
+
     public ResultList submitQuery(QueryParameter queryParameter) {
         var searchResponse = esClient.search(queryParameter);
 
