@@ -111,17 +111,8 @@ public class EsClient {
 
         Query queryCompleted = boolQueryBuilder.build()._toQuery();
 
-        Highlight.Builder highlightBuilder = new Highlight.Builder();
-        HighlightField.Builder highlightField = new HighlightField.Builder();
-        Map<String, HighlightField> map = new HashMap<>();
-        map.put("content", highlightField.build());
-        highlightBuilder
-                .preTags("<strong>")
-                .postTags("</strong>")
-                .numberOfFragments(1)
-                .fragmentSize(500)
-                .fields(map)
-                .highlightQuery(queryCompleted);
+        Highlight.Builder highlightBuilder = generateHighlight();
+        highlightBuilder.highlightQuery(queryCompleted);
 
         try {
             response = elasticsearchClient.search(s -> s
@@ -137,6 +128,19 @@ public class EsClient {
         }
 
         return response;
+    }
+
+    private Highlight.Builder generateHighlight() {
+        Highlight.Builder highlightBuilder = new Highlight.Builder();
+        HighlightField.Builder highlightField = new HighlightField.Builder();
+        Map<String, HighlightField> map = new HashMap<>();
+        map.put("content", highlightField.build());
+        return highlightBuilder
+                .preTags("<strong>")
+                .postTags("</strong>")
+                .numberOfFragments(1)
+                .fragmentSize(500)
+                .fields(map);
     }
 
     private void generateFilterQuery(BoolQuery.Builder boolQuery, Filter filter) {

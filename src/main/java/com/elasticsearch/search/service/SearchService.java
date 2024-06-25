@@ -3,11 +3,10 @@ package com.elasticsearch.search.service;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.Suggestion;
+import com.elasticsearch.search.api.model.QueryParameter;
 import com.elasticsearch.search.api.model.Result;
 import com.elasticsearch.search.api.model.ResultList;
 import com.elasticsearch.search.domain.EsClient;
-import com.elasticsearch.search.api.model.QueryParameter;
-import com.elasticsearch.search.utils.Util;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +32,13 @@ public class SearchService {
         int totalPages = (int) Math.ceil((double) totalHits / EsClient.PAGE_SIZE);
         var searchTime = (int) searchResponse.took();
         List<Hit<ObjectNode>> hits = hitsList.hits();
-//        List<Hit<ObjectNode>> hits = searchResponse.hits().hits();
 
         String suggest = getSuggestion(searchResponse);
 
         var results = hits.stream().map(h -> {
                     if (h.source() != null) {
                         return new Result()
+                                .id(h.id())
                                 .abs(treatContent(h.source().get("content").asText()))
                                 .title(h.source().get("title").asText())
                                 .url(h.source().get("url").asText())

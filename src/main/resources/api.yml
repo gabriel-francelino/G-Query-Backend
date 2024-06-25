@@ -5,6 +5,27 @@ info:
   description: Initial example to submit Elasticsearch queries
 
 paths:
+  /search/fav:
+    post:
+      summary: 'Submits a document to favorite list'
+      operationId: favorite
+      tags:
+        - favorite
+      parameters:
+        - name: documentId
+          description: Document ID to be added to favorite list
+          in: path
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /search:
     get:
       summary: 'Submits a query to Elasticsearch'
@@ -38,16 +59,6 @@ paths:
                     type: string
                 filterMaxDate:
                     type: string
-      #        - name: query
-#          in: query
-#          description: Query to be submitted
-#          schema:
-#            type: string
-#        - name: pageNumber
-#          in: query
-#          description: Page number
-#          schema:
-#            type: integer
       responses:
         200:
           description: OK
@@ -83,6 +94,8 @@ components:
     Result:
       type: object
       properties:
+        id:
+          type: string
         title:
           type: string
         url:
