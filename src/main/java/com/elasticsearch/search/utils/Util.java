@@ -82,4 +82,8 @@ public class Util {
 
         return phrases;
     }
+
+    public static boolean isBooleanSearch(String query) {
+        return query.contains("AND") || query.contains("OR") || query.contains("NOT");
+    }
 }

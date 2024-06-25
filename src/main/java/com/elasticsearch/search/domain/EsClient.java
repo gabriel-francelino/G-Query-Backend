@@ -138,7 +138,12 @@ public class EsClient {
         Suggester phraseSuggestion = getPhraseSuggestion(query);
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-        generateQuery(boolQueryBuilder, query);
+
+        if (!Util.isBooleanSearch(query)) {
+            generateSimpleQuery(boolQueryBuilder, query);
+        } else {
+            generateBooleanSearchQuery(boolQueryBuilder, query);
+        }
 
         if (Util.hasFilter(queryParameter)) {
             Filter filter = Util.createFilterClass(queryParameter);
@@ -148,7 +153,7 @@ public class EsClient {
         Query queryCompleted = boolQueryBuilder.build()._toQuery();
 
         Highlight.Builder highlightBuilder = generateHighlight();
-        highlightBuilder.highlightQuery(queryCompleted);
+//        highlightBuilder.highlightQuery(queryCompleted);
 
         try {
             response = elasticsearchClient.search(s -> s
@@ -203,7 +208,7 @@ public class EsClient {
         boolQuery.filter(filters);
     }
 
-    private void generateQuery(BoolQuery.Builder boolQuery, String query) {
+    private void generateSimpleQuery(BoolQuery.Builder boolQuery, String query) {
         Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
         List<String> phrases = Util.containsMatchPhrase(query);
 
@@ -220,11 +225,82 @@ public class EsClient {
 
             boolQuery.must(queries);
             boolQuery.should(matchQuery);
-            //return BoolQuery.of(b -> b.must(queries).should(matchQuery))._toQuery();
         } else {
             boolQuery.must(matchQuery);
-            //return BoolQuery.of(b -> b.must(matchQuery))._toQuery();
         }
+    }
+
+    private void generateBooleanSearchQuery(BoolQuery.Builder boolQuery, String query) {
+        if (query.contains("NOT")) {
+            String[] queryList = query.split("NOT");
+            query = queryList[0].trim();
+            String queryNot = queryList[1].trim();
+            Query mustNotQuery = MatchQuery.of(q -> q.field("content").query(queryNot))._toQuery();
+            boolQuery.mustNot(mustNotQuery);
+        }
+
+        if (Util.isBooleanSearch(query)) {
+            if (query.contains("AND")) {
+                List<String> arrayWithAND = new ArrayList<>(List.of(query.split("AND")));
+
+                if (arrayWithAND.contains("OR")) {
+                    List<String> auxOR = new ArrayList<>();
+                    List<String> arrOR = arrayWithAND.stream()
+                            .filter(s -> s.contains("OR"))
+                            .toList();
+
+                    for (String string : arrOR) {
+                        String[] terms = string.split("OR");
+                        for (String term : terms) {
+                            auxOR.add(term.trim());
+                        }
+                    }
+
+                    List<Query> shouldQueriesOR = generateQueryOR(auxOR);
+
+                    boolQuery.should(shouldQueriesOR);
+                    arrayWithAND.removeIf(s -> s.contains("OR"));
+                }
+
+                List<Query> mustQueriesAND = new ArrayList<>();
+                for (String string : arrayWithAND) {
+                    Query matchPhraseQuery = MatchQuery.of(
+                            m -> m.field("content").query(string)
+                    )._toQuery();
+
+                    mustQueriesAND.add(matchPhraseQuery);
+                }
+
+                boolQuery.must(mustQueriesAND);
+            }
+
+            if (query.contains("OR") && !query.contains("AND")) {
+                List<String> arrayWithOR = new ArrayList<>(List.of(query.split("OR")));
+
+                List<Query> shouldQueriesOR = generateQueryOR(arrayWithOR);
+
+                boolQuery.should(shouldQueriesOR);
+            }
+        } else {
+            String finalQuery = query;
+            Query matchQuery = MatchQuery.of(q -> q.field("content").query(finalQuery))._toQuery();
+            boolQuery.must(matchQuery);
+        }
+
+    }
+
+    private List<Query> generateQueryOR(List<String> queryOR) {
+        List<Query> shouldQueriesOR = new ArrayList<>();
+
+        for (String term : queryOR) {
+            Query matchQuery = MatchQuery.of(
+                    m -> m.field("content").query(term.trim())
+            )._toQuery();
+
+            shouldQueriesOR.add(matchQuery);
+        }
+
+        return shouldQueriesOR;
     }
 
     private Suggester getPhraseSuggestion(String query) {
