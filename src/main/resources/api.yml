@@ -105,25 +105,31 @@ paths:
               type: object
               properties:
                 query:
-                    type: string
+                  type: string
                 pageNumber:
-                    type: integer
+                  type: integer
                 filterReadingTime:
-                    type: boolean
-                    default: false
+                  type: boolean
+                  default: false
                 filterDateCreation:
-                    type: boolean
-                    default: false
+                  type: boolean
+                  default: false
                 filterMinValue:
-                    type: integer
-                    default: 0
+                  type: integer
+                  default: 0
                 filterMaxValue:
-                    type: integer
-                    default: 999999
+                  type: integer
+                  default: 999999
                 filterMinDate:
-                    type: string
+                  type: string
                 filterMaxDate:
-                    type: string
+                  type: string
+                sortByTitle:
+                  type: string
+                sortByReadingTime:
+                  type: string
+                sortByDateCreation:
+                  type: string
       responses:
         200:
           description: OK

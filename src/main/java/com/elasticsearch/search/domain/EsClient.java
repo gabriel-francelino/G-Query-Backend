@@ -1,7 +1,11 @@
 package com.elasticsearch.search.domain;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldSort;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Highlight;
 import co.elastic.clients.elasticsearch.core.search.HighlightField;
@@ -150,25 +154,74 @@ public class EsClient {
             generateFilterQuery(boolQueryBuilder, filter);
         }
 
+
+//        FieldSort fieldSort = FieldSort.of(s -> s
+//                .field("reading_time")
+//                .order(SortOrder.Desc));
+//
+//        SortOptions sortOptions = SortOptions.of(s -> s
+//                .field(fieldSort));
+
         Query queryCompleted = boolQueryBuilder.build()._toQuery();
 
         Highlight.Builder highlightBuilder = generateHighlight();
 //        highlightBuilder.highlightQuery(queryCompleted);
 
+        SearchRequest.Builder searchRequest = new SearchRequest.Builder()
+                .index("wikipedia")
+                .from(currentPage)
+                .size(PAGE_SIZE)
+                .query(queryCompleted)
+                .highlight(highlightBuilder.build())
+                .suggest(phraseSuggestion);
+
+        if (Util.hasOrdering(queryParameter)) {
+            List<SortOptions> sortOptions = generateSortOptions(queryParameter);
+            searchRequest.sort(sortOptions);
+        }
+
         try {
-            response = elasticsearchClient.search(s -> s
-                    .index("wikipedia")
-                    .from(currentPage)
-                    .size(PAGE_SIZE)
-                    .query(queryCompleted)
-                    .highlight(highlightBuilder.build())
-                    .suggest(phraseSuggestion), ObjectNode.class
-            );
+            response = elasticsearchClient.search(searchRequest.build(), ObjectNode.class);
+//            response = elasticsearchClient.search(s -> s
+//                    .index("wikipedia")
+//                    .from(currentPage)
+//                    .size(PAGE_SIZE)
+//                    .query(queryCompleted)
+//                    .highlight(highlightBuilder.build())
+//                    .sort(sortOptions)
+//                    .suggest(phraseSuggestion), ObjectNode.class
+//            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         return response;
+    }
+
+    private List<SortOptions> generateSortOptions(QueryParameter queryParameter) {
+        List<SortOptions> sortOptionsList =  new ArrayList<>();
+
+        if (queryParameter.getSortByReadingTime() != null) {
+            SortOrder order = queryParameter.getSortByReadingTime().equals("asc") ? SortOrder.Asc: SortOrder.Desc;
+            FieldSort fieldSort1 = FieldSort.of(s -> s
+                    .field("reading_time")
+                    .order(order));
+
+            SortOptions sort1 = SortOptions.of(s -> s.field(fieldSort1));
+            sortOptionsList.add(sort1);
+        }
+
+        if (queryParameter.getSortByDateCreation() != null) {
+            SortOrder order = queryParameter.getSortByDateCreation().equals("asc") ? SortOrder.Asc: SortOrder.Desc;
+            FieldSort fieldSort2 = FieldSort.of(s -> s
+                    .field("dt_creation")
+                    .order(order));
+
+            SortOptions sort2 = SortOptions.of(s -> s.field(fieldSort2));
+            sortOptionsList.add(sort2);
+        }
+
+        return sortOptionsList;
     }
 
     private Highlight.Builder generateHighlight() {

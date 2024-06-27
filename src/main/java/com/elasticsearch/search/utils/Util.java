@@ -86,4 +86,13 @@ public class Util {
     public static boolean isBooleanSearch(String query) {
         return query.contains("AND") || query.contains("OR") || query.contains("NOT");
     }
+
+    public static boolean hasOrdering(QueryParameter parameter) {
+        String readingTimeOrder = parameter.getSortByReadingTime();
+        String dateCreationOrder = parameter.getSortByDateCreation();
+        boolean condition1 = readingTimeOrder != null && (readingTimeOrder.equals("asc") || readingTimeOrder.equals("desc"));
+        boolean condition2 = dateCreationOrder != null && (dateCreationOrder.equals("asc") || dateCreationOrder.equals("desc"));
+
+        return condition1 || condition2;
+    }
 }
