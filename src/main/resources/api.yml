@@ -148,6 +148,8 @@ components:
           type: integer
         total_pages:
           type: integer
+        current_page:
+          type: integer
         suggestion:
           type: string
         search_time:

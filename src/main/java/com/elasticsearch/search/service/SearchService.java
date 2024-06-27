@@ -88,12 +88,14 @@ public class SearchService {
                 }
         ).collect(Collectors.toList());
 
+        int currentPage = queryParameter.getPageNumber() != null ? queryParameter.getPageNumber() : 1;
         return new ResultList()
                 .searchTime(searchTime)
                 .totalHits(totalHits)
                 .totalPages(totalPages)
                 .suggestion(suggest)
-                .results(results);
+                .results(results)
+                .currentPage(currentPage);
     }
 
     private String getSuggestion(SearchResponse searchResponse) {

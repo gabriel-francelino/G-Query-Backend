@@ -133,7 +133,7 @@ public class EsClient {
         Integer pageNumber = Util.validatePageNumber(queryParameter.getPageNumber());
 
         SearchResponse<ObjectNode> response;
-        Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
+        Integer currentPage = (PAGE_SIZE * (pageNumber - 1));
 
         Suggester phraseSuggestion = getPhraseSuggestion(query);
 
@@ -158,7 +158,7 @@ public class EsClient {
         try {
             response = elasticsearchClient.search(s -> s
                     .index("wikipedia")
-                    .from(currencyPage)
+                    .from(currentPage)
                     .size(PAGE_SIZE)
                     .query(queryCompleted)
                     .highlight(highlightBuilder.build())
