@@ -24,11 +24,11 @@ public class SearchService {
         this.esClient = esClient;
     }
 
-    public void favoriteDocument(String id) {
+    public void addToFavorites(String id) {
         esClient.favoriteDocument(id);
     }
 
-    public void unfavoriteDocument(String id) {
+    public void removeFromFavorites(String id) {
         esClient.unfavoriteDocument(id);
     }
 

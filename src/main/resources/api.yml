@@ -8,9 +8,9 @@ paths:
   /search/fav:
     get:
       summary: 'Retrieves the favorite list'
-      operationId: search-fav
+      operationId: searchFavorites
       tags:
-        - search-fav
+        - searchFavorites
       responses:
         200:
           description: OK
@@ -26,15 +26,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /search/fav/:
+  /search/fav/{id}:
     post:
-      summary: 'Submits a document to favorite list'
-      operationId: favorite
+      summary: 'Add a document to favorite list'
+      operationId: addToFavorites
       tags:
-        - favorite
+        - addToFavorites
       parameters:
-        - name: documentId
+        - name: id
           description: Document ID to be added to favorite list
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        201:
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Document with ID {id} has been added to favorite list'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      operationId: removeFromFavorites
+      tags:
+        - removeFromFavorites
+      summary: 'Remove a document from favorite list'
+      parameters:
+        - name: id
+          description: Document ID to be removed from favorite list
+          required: true
           in: path
           schema:
             type: string
@@ -42,9 +75,16 @@ paths:
         200:
           description: OK
           content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Document with ID {id} has been removed from favorite list'
+        400:
+          description: Bad request
+          content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultList'
+                $ref: '#/components/schemas/Error'
         500:
           description: Unexpected error
           content:

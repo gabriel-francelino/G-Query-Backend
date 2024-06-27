@@ -25,21 +25,39 @@ public class SearchController implements SearchApi {
         return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(result));
     }
 
-    @PostMapping("/search/fav/{id}")
-    public CompletableFuture<ResponseEntity<String>> favoriteDocument(@PathVariable String id) {
-        searchService.favoriteDocument(id);
-        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok("Article with id " + id + " was favorited"));
+    @Override
+    public CompletableFuture<ResponseEntity<String>> addToFavorites(String id) {
+        searchService.addToFavorites(id);
+        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok("Document with id " + id + " has been added to favorites"));
     }
 
-    @GetMapping("/search/fav")
+    @Override
+    public CompletableFuture<ResponseEntity<String>> removeFromFavorites(String id) {
+        searchService.removeFromFavorites(id);
+        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok("Document with id " + id + " has been removed from  favorites"));
+    }
+
+    @Override
     public CompletableFuture<ResponseEntity<ResultList>> searchFavorites() {
         var result = searchService.searchFavorites();
         return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(result));
     }
 
-    @DeleteMapping("/search/fav/{id}")
-    public CompletableFuture<ResponseEntity<String>> unfavoriteDocument(@PathVariable String id) {
-        searchService.unfavoriteDocument(id);
-        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok("Article with id " + id + " was unfavorited"));
-    }
+    //    @PostMapping("/search/fav/{id}")
+//    public CompletableFuture<ResponseEntity<String>> favoriteDocument(@PathVariable String id) {
+//        searchService.favoriteDocument(id);
+//        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok("Article with id " + id + " was favorited"));
+//    }
+//
+//    @GetMapping("/search/fav")
+//    public CompletableFuture<ResponseEntity<ResultList>> searchFavorites() {
+//        var result = searchService.searchFavorites();
+//        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(result));
+//    }
+//
+//    @DeleteMapping("/search/fav/{id}")
+//    public CompletableFuture<ResponseEntity<String>> unfavoriteDocument(@PathVariable String id) {
+//        searchService.unfavoriteDocument(id);
+//        return CompletableFuture.supplyAsync(() -> ResponseEntity.ok("Article with id " + id + " was unfavorited"));
+//    }
 }
