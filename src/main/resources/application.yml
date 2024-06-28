@@ -2,3 +2,16 @@ server:
   port: 8080
   servlet:
     context-path: /v1
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: gabriel.francelino@sou.unifal-mg.edu.br
+    password: ibuv tlzr ftcy ypqy
+    properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
