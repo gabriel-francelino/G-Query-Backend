@@ -1,6 +1,7 @@
 package com.elasticsearch.search.utils;
 
 import com.elasticsearch.search.api.model.QueryParameter;
+import com.elasticsearch.search.api.model.Result;
 import com.elasticsearch.search.domain.Filter;
 
 import java.time.LocalDate;
@@ -98,4 +99,37 @@ public class Util {
 
         return condition1 || condition2;
     }
+
+    // Operações de email a seguir
+    public static boolean isValidEmail(String email) {
+        String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(regex);
+        return pattern.matcher(email).matches();
+    }
+
+    public static String generateEmailBody(List<Result> results) {
+        StringBuilder body = new StringBuilder();
+        body.append("Olá!\n\n");
+        body.append("Queremos agradecer por utilizar nosso sistema de busca! 🎉\n");
+        body.append("Estamos animados para compartilhar os resultados que encontramos para você:\n\n");
+
+        for (Result result : results) {
+            body.append("------------------------------------------------\n");
+            body.append("🔍 **Título:** ").append(result.getTitle()).append("\n");
+            body.append("🔗 **URL:** ").append(result.getUrl()).append("\n");
+            body.append("📝 **Resumo:** ").append(result.getAbs()).append("\n");
+            body.append("⏳ **Tempo de leitura:** ").append(result.getReadingTime()).append(" minutos\n");
+            body.append("📅 **Data de criação:** ").append(result.getDateCreation()).append("\n");
+//            body.append("⭐ **Favorito:** ").append(result.isFavorite() ? "Sim" : "Não").append("\n\n");
+        }
+
+        body.append("------------------------------------------------\n\n");
+        body.append("Esperamos que você encontre essas informações úteis!\n");
+        body.append("Se precisar de mais alguma coisa, não hesite em nos contatar.\n\n");
+        body.append("Obrigado e até a próxima! 🙌\n");
+        body.append("Equipe de Suporte\n");
+
+        return body.toString();
+    }
+
 }
