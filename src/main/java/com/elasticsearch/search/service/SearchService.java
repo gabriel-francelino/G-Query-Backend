@@ -82,13 +82,15 @@ public class SearchService {
                                 .url(h.source().get("url").asText())
                                 .readingTime(h.source().get("reading_time").asInt())
                                 .dateCreation(h.source().get("dt_creation").asText())
-                                .highlight(h.highlight().get("content").get(0));
+                                .highlight(h.highlight().get("content").get(0))
+                                .isFavorite(isFavoriteHit(h.id()));
                     }
                     return new Result();
                 }
         ).collect(Collectors.toList());
 
         int currentPage = queryParameter.getPageNumber() != null ? queryParameter.getPageNumber() : 1;
+
         return new ResultList()
                 .searchTime(searchTime)
                 .totalHits(totalHits)
@@ -111,6 +113,18 @@ public class SearchService {
             return "";
 
         return suggestionList.get(0).highlighted();
+    }
+
+    private boolean isFavoriteHit(String hitId) {
+        List<Hit<ObjectNode>> favoriteHits = esClient.searchFavorites().hits().hits();
+
+        for (Hit<ObjectNode> favoriteHit : favoriteHits) {
+            if (favoriteHit.id().equals(hitId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private String treatContent(String content) {
