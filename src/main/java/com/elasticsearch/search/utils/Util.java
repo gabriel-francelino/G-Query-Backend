@@ -84,6 +84,9 @@ public class Util {
     }
 
     public static boolean isBooleanSearch(String query) {
+        if (query == null || query.isBlank())
+            return false;
+
         return query.contains("AND") || query.contains("OR") || query.contains("NOT");
     }
 
