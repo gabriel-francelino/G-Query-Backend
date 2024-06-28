@@ -4,5 +4,5 @@ import com.elasticsearch.search.api.model.Result;
 
 import java.util.List;
 
-public record EmailRequestDto(String destinatario, List<Result> results) {
+public record EmailRequestDto(String receiver, List<Result> results) {
 }

@@ -12,7 +12,7 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
-    private String remetente;
+    private String sender;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -20,7 +20,7 @@ public class EmailService {
 
     public void sendEmail() {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(remetente);
+        message.setFrom(sender);
         message.setTo("gabrielfrancelino3c@gmail.com");
         message.setSubject("Teste de envio de email");
         message.setText("Teste de envio de email com o Spring Boot");
@@ -30,12 +30,14 @@ public class EmailService {
     public void sendDocumentByEmail(EmailRequestDto emailRequest) {
         SimpleMailMessage message = new SimpleMailMessage();
 
+        String receiver = emailRequest.receiver();
+        String subject = "Check the Results of Your Last Search \uD83D\uDD0D";
         String body = Util.generateEmailBody(emailRequest.results());
 
-        message.setFrom(remetente);
-        message.setTo("gabrielfrancelino3c@gmail.com");
-        message.setCc("gabriel.piva@sou.unifal-mg.edu.br");
-        message.setSubject("Confira os Resultados da Sua Última Busca \uD83D\uDD0D");
+        message.setFrom(sender);
+        message.setTo(receiver);
+//        message.setCc("gabriel.piva@sou.unifal-mg.edu.br");
+        message.setSubject(subject);
         message.setText(body);
         mailSender.send(message);
     }

@@ -109,25 +109,25 @@ public class Util {
 
     public static String generateEmailBody(List<Result> results) {
         StringBuilder body = new StringBuilder();
-        body.append("Olá!\n\n");
-        body.append("Queremos agradecer por utilizar nosso sistema de busca! 🎉\n");
-        body.append("Estamos animados para compartilhar os resultados que encontramos para você:\n\n");
+        body.append("Hello!\n\n");
+        body.append("We want to thank you for using our search system! 🎉\n");
+        body.append("We are excited to share the results we found for you:\n\n");
 
         for (Result result : results) {
-            body.append("------------------------------------------------\n");
-            body.append("🔍 **Título:** ").append(result.getTitle()).append("\n");
+            body.append("------------------------------------------------\n\n");
+            body.append("🔍 **Title:** ").append(result.getTitle()).append("\n");
             body.append("🔗 **URL:** ").append(result.getUrl()).append("\n");
-            body.append("📝 **Resumo:** ").append(result.getAbs()).append("\n");
-            body.append("⏳ **Tempo de leitura:** ").append(result.getReadingTime()).append(" minutos\n");
-            body.append("📅 **Data de criação:** ").append(result.getDateCreation()).append("\n");
-//            body.append("⭐ **Favorito:** ").append(result.isFavorite() ? "Sim" : "Não").append("\n\n");
+            body.append("📝 **Summary:** ").append(result.getAbs()).append("\n");
+            body.append("⏳ **Reading time:** ").append(result.getReadingTime()).append(" minutes\n");
+            body.append("📅 **Creation date:** ").append(result.getDateCreation()).append("\n\n");
+//        body.append("⭐ **Favorite:** ").append(result.isFavorite() ? "Yes" : "No").append("\n\n");
         }
 
         body.append("------------------------------------------------\n\n");
-        body.append("Esperamos que você encontre essas informações úteis!\n");
-        body.append("Se precisar de mais alguma coisa, não hesite em nos contatar.\n\n");
-        body.append("Obrigado e até a próxima! 🙌\n");
-        body.append("Equipe de Suporte\n");
+        body.append("We hope you find this information useful!\n");
+        body.append("If you need anything else, don't hesitate to contact us.\n\n");
+        body.append("Thank you and see you next time! 🙌\n");
+        body.append("G-Query Support Team\n");
 
         return body.toString();
     }
