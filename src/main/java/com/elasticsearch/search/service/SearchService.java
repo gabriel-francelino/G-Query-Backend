@@ -69,11 +69,24 @@ public class SearchService {
         int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
         int totalPages = (int) Math.ceil((double) totalHits / EsClient.PAGE_SIZE);
         var searchTime = (int) searchResponse.took();
+        String suggest = getSuggestion(searchResponse);
         List<Hit<ObjectNode>> hits = hitsList.hits();
 
-        String suggest = getSuggestion(searchResponse);
+        var results = generateResultsList(hits);
 
-        var results = hits.stream().map(h -> {
+        int currentPage = queryParameter.getPageNumber() != null ? queryParameter.getPageNumber() : 1;
+
+        return new ResultList()
+                .searchTime(searchTime)
+                .totalHits(totalHits)
+                .totalPages(totalPages)
+                .suggestion(suggest)
+                .results(results)
+                .currentPage(currentPage);
+    }
+
+    private List<Result> generateResultsList(List<Hit<ObjectNode>> hits) {
+        return hits.stream().map(h -> {
                     if (h.source() != null) {
                         return new Result()
                                 .id(h.id())
@@ -88,16 +101,6 @@ public class SearchService {
                     return new Result();
                 }
         ).collect(Collectors.toList());
-
-        int currentPage = queryParameter.getPageNumber() != null ? queryParameter.getPageNumber() : 1;
-
-        return new ResultList()
-                .searchTime(searchTime)
-                .totalHits(totalHits)
-                .totalPages(totalPages)
-                .suggestion(suggest)
-                .results(results)
-                .currentPage(currentPage);
     }
 
     private String getSuggestion(SearchResponse searchResponse) {
