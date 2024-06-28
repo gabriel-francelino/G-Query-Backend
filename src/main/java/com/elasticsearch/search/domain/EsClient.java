@@ -71,31 +71,6 @@ public class EsClient {
         elasticsearchClient = new co.elastic.clients.elasticsearch.ElasticsearchClient(transport);
     }
 
-//    public SearchResponse search(QueryParameter queryParameter) {
-//        String query = queryParameter.getQuery();
-//        Integer pageNumber = queryParameter.getPageNumber();
-//        Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
-//
-//        Suggester phraseSuggestion = getPhraseSuggestion(query);
-//
-//        SearchResponse<ObjectNode> response;
-//        Integer currencyPage = (PAGE_SIZE * (pageNumber - 1));
-//
-//        try {
-//            response = elasticsearchClient.search(s -> s
-//                    .index("wikipedia")
-//                    .from(currencyPage)
-//                    .size(PAGE_SIZE)
-//                    .query(matchQuery)
-//                    .suggest(phraseSuggestion), ObjectNode.class
-//            );
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return response;
-//    }
-
     public void favoriteDocument(String id) {
         try {
             Query matchQuery = MatchQuery.of(q -> q.field("_id").query(id))._toQuery();
@@ -154,18 +129,9 @@ public class EsClient {
             generateFilterQuery(boolQueryBuilder, filter);
         }
 
-
-//        FieldSort fieldSort = FieldSort.of(s -> s
-//                .field("reading_time")
-//                .order(SortOrder.Desc));
-//
-//        SortOptions sortOptions = SortOptions.of(s -> s
-//                .field(fieldSort));
-
         Query queryCompleted = boolQueryBuilder.build()._toQuery();
 
         Highlight.Builder highlightBuilder = generateHighlight();
-//        highlightBuilder.highlightQuery(queryCompleted);
 
         SearchRequest.Builder searchRequest = new SearchRequest.Builder()
                 .index("wikipedia")
@@ -182,15 +148,6 @@ public class EsClient {
 
         try {
             response = elasticsearchClient.search(searchRequest.build(), ObjectNode.class);
-//            response = elasticsearchClient.search(s -> s
-//                    .index("wikipedia")
-//                    .from(currentPage)
-//                    .size(PAGE_SIZE)
-//                    .query(queryCompleted)
-//                    .highlight(highlightBuilder.build())
-//                    .sort(sortOptions)
-//                    .suggest(phraseSuggestion), ObjectNode.class
-//            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -49,7 +49,8 @@ public class SearchService {
                                 .title(h.source().get("title").asText())
                                 .url(h.source().get("url").asText())
                                 .readingTime(h.source().get("reading_time").asInt())
-                                .dateCreation(h.source().get("dt_creation").asText());
+                                .dateCreation(h.source().get("dt_creation").asText())
+                                .isFavorite(true);
                     }
                     return new Result();
                 }
