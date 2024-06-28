@@ -122,8 +122,10 @@ paths:
                   default: 999999
                 filterMinDate:
                   type: string
+                  default: '1970-01-01'
                 filterMaxDate:
                   type: string
+                  default: '9999-12-31'
                 sortByTitle:
                   type: string
                 sortByReadingTime:
