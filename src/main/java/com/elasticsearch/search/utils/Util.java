@@ -2,7 +2,9 @@ package com.elasticsearch.search.utils;
 
 import com.elasticsearch.search.api.model.QueryParameter;
 import com.elasticsearch.search.api.model.Result;
+import com.elasticsearch.search.domain.EmailRequestDto;
 import com.elasticsearch.search.domain.Filter;
+import jakarta.mail.MessagingException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -105,6 +107,23 @@ public class Util {
         String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         Pattern pattern = Pattern.compile(regex);
         return pattern.matcher(email).matches();
+    }
+
+    public static void validadteEmailRequest(EmailRequestDto emailRequest) throws MessagingException {
+        String receiver = emailRequest.receiver();
+        List<Result> results = emailRequest.results();
+
+        if (receiver == null || receiver.isBlank()) {
+            throw new MessagingException("Receiver email address is required!");
+        }
+
+        if (!isValidEmail(receiver)) {
+            throw new MessagingException("Invalid email address: " + receiver + "!");
+        }
+
+        if (results == null || results.isEmpty()) {
+            throw new MessagingException("Results list is empty!");
+        }
     }
 
     public static String generateEmailBody(List<Result> results) {

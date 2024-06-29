@@ -31,18 +31,7 @@ public class EmailService {
     }
 
     public void sendDocumentByEmail(EmailRequestDto emailRequest) throws MessagingException {
-//        SimpleMailMessage message = new SimpleMailMessage();
-//
-//        String receiver = emailRequest.receiver();
-//        String subject = "Check the Results of Your Last Search \uD83D\uDD0D";
-//        String body = Util.generateEmailBody(emailRequest.results());
-//
-//        message.setFrom(sender);
-//        message.setTo(receiver);
-////        message.setCc("gabriel.piva@sou.unifal-mg.edu.br");
-//        message.setSubject(subject);
-//        message.setText(body);
-//        mailSender.send(message);
+        Util.validadteEmailRequest(emailRequest);
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -53,7 +42,7 @@ public class EmailService {
 
         helper.setFrom(sender);
         helper.setTo(receiver);
-        helper.setCc("gabriel.piva@sou.unifal-mg.edu.br");
+//        helper.setCc("gabriel.piva@sou.unifal-mg.edu.br");
         helper.setSubject(subject);
         helper.setText(htmlBody, true);
 
