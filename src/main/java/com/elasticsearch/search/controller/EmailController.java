@@ -2,6 +2,7 @@ package com.elasticsearch.search.controller;
 
 import com.elasticsearch.search.domain.EmailRequestDto;
 import com.elasticsearch.search.service.EmailService;
+import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,11 @@ public class EmailController {
 
     @PostMapping("/search/send-email")
     public ResponseEntity<String> sendDocsByEmail(@RequestBody EmailRequestDto emailRequest) {
-        emailService.sendDocumentByEmail(emailRequest);
-        return ResponseEntity.ok("Email sent successfully!");
+        try {
+            emailService.sendDocumentByEmail(emailRequest);
+            return ResponseEntity.ok("Email sent successfully!");
+        } catch (MessagingException e) {
+            return ResponseEntity.badRequest().body("Error sending email: " + e.getMessage());
+        }
     }
 }

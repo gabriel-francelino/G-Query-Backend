@@ -132,4 +132,66 @@ public class Util {
         return body.toString();
     }
 
+    public static String generateEmailBodyHtml(List<Result> results) {
+        StringBuilder body = new StringBuilder();
+        body.append("<!DOCTYPE html>");
+        body.append("<html lang='en'>");
+        body.append("<head>");
+        body.append("<meta charset='UTF-8'>");
+        body.append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+        body.append("<style>");
+        body.append("body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }");
+        body.append(".container { padding: 20px; max-width: 800px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }");
+        body.append(".header { font-size: 28px; font-weight: bold; color: #333; text-align: center; margin-bottom: 20px; }");
+        body.append(".result { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; background-color: #f9f9f9; transition: transform 0.2s; }");
+        body.append(".result:hover { transform: scale(1.02); }");
+        body.append(".result .title { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 10px; }");
+        body.append(".result .url { color: #0066cc; margin-bottom: 10px; display: block; text-decoration: none; }");
+        body.append(".result .url:hover { text-decoration: underline; }");
+        body.append(".result .summary { margin: 10px 0; font-size: 18px; color: #555; }");
+        body.append(".result .meta { font-size: 16px; color: #777; }");
+        body.append("p { font-size: 18px; line-height: 1.6; color: #555; }");
+        body.append("@media (max-width: 600px) {");
+        body.append(".container { padding: 10px; }");
+        body.append(".result { padding: 15px; }");
+        body.append(".result .title { font-size: 20px; }");
+        body.append(".result .summary { font-size: 16px; }");
+        body.append("}");
+        body.append("</style>");
+        body.append("<title>Search Results</title>");
+        body.append("</head>");
+        body.append("<body>");
+        body.append("<div class='container'>");
+        body.append("<div class='header'>");
+        body.append("Hello!");
+        body.append("</div>");
+        body.append("<p>We want to thank you for using our search system! 🎉</p>");
+        body.append("<p>We are excited to share the results we found for you:</p>");
+
+        for (Result result : results) {
+            body.append("<div class='result'>");
+            body.append("<div class='title'>🔍 <strong>Title:</strong> ").append(result.getTitle()).append("</div>");
+            body.append("<a class='url' href='").append(result.getUrl()).append("'>🔗 <strong>URL:</strong> ").append(result.getUrl()).append("</a>");
+            body.append("<div class='summary'>📝 <strong>Summary:</strong> ").append(result.getAbs()).append("</div>");
+            body.append("<div class='meta'>⏳ <strong>Reading time:</strong> ").append(result.getReadingTime()).append(" minutes</div>");
+            body.append("<div class='meta'>📅 <strong>Creation date:</strong> ").append(result.getDateCreation()).append("</div>");
+            // body.append("<div class='meta'>⭐ <strong>Favorite:</strong> ").append(result.isFavorite() ? "Yes" : "No").append("</div>");
+            body.append("</div>");
+        }
+
+        body.append("<p>We hope you find this information useful!</p>");
+        body.append("<p>If you need anything else, don't hesitate to contact us.</p>");
+        body.append("<p>Thank you and see you next time! 🙌</p>");
+        body.append("<p>G-Query Support Team</p>");
+
+        body.append("</div>");
+        body.append("</body>");
+        body.append("</html>");
+
+        return body.toString();
+    }
+
+
+
+
 }

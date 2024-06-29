@@ -2,9 +2,12 @@ package com.elasticsearch.search.service;
 
 import com.elasticsearch.search.domain.EmailRequestDto;
 import com.elasticsearch.search.utils.Util;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,18 +30,33 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendDocumentByEmail(EmailRequestDto emailRequest) {
-        SimpleMailMessage message = new SimpleMailMessage();
+    public void sendDocumentByEmail(EmailRequestDto emailRequest) throws MessagingException {
+//        SimpleMailMessage message = new SimpleMailMessage();
+//
+//        String receiver = emailRequest.receiver();
+//        String subject = "Check the Results of Your Last Search \uD83D\uDD0D";
+//        String body = Util.generateEmailBody(emailRequest.results());
+//
+//        message.setFrom(sender);
+//        message.setTo(receiver);
+////        message.setCc("gabriel.piva@sou.unifal-mg.edu.br");
+//        message.setSubject(subject);
+//        message.setText(body);
+//        mailSender.send(message);
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         String receiver = emailRequest.receiver();
         String subject = "Check the Results of Your Last Search \uD83D\uDD0D";
-        String body = Util.generateEmailBody(emailRequest.results());
+        String htmlBody = Util.generateEmailBodyHtml(emailRequest.results());
 
-        message.setFrom(sender);
-        message.setTo(receiver);
-//        message.setCc("gabriel.piva@sou.unifal-mg.edu.br");
-        message.setSubject(subject);
-        message.setText(body);
+        helper.setFrom(sender);
+        helper.setTo(receiver);
+        helper.setCc("gabriel.piva@sou.unifal-mg.edu.br");
+        helper.setSubject(subject);
+        helper.setText(htmlBody, true);
+
         mailSender.send(message);
     }
 }
