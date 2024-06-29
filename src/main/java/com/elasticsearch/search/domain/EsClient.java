@@ -155,6 +155,22 @@ public class EsClient {
         return response;
     }
 
+    private Query generateMatchQuery(String query, String field){
+        return new MatchQuery.Builder()
+                .field(field)
+                .query(query)
+                .build()
+                ._toQuery();
+    }
+
+    private Query generateMultiMatchQuery(String query, String... fields) {
+        return new MultiMatchQuery.Builder()
+                .fields(List.of(fields))
+                .query(query)
+                .build()
+                ._toQuery();
+    }
+
     private List<SortOptions> generateSortOptions(QueryParameter queryParameter) {
         List<SortOptions> sortOptionsList =  new ArrayList<>();
 
@@ -219,7 +235,8 @@ public class EsClient {
     }
 
     private void generateSimpleQuery(BoolQuery.Builder boolQuery, String query) {
-        Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
+//        Query matchQuery = MatchQuery.of(q -> q.field("content").query(query))._toQuery();
+        Query multiMatchQuery = generateMultiMatchQuery(query, "title", "content");
         List<String> phrases = Util.containsMatchPhrase(query);
 
         if (!phrases.isEmpty()) {
@@ -234,9 +251,9 @@ public class EsClient {
             }
 
             boolQuery.must(queries);
-            boolQuery.should(matchQuery);
+            boolQuery.should(multiMatchQuery);
         } else {
-            boolQuery.must(matchQuery);
+            boolQuery.must(multiMatchQuery);
         }
     }
 
@@ -245,7 +262,8 @@ public class EsClient {
             String[] queryList = query.split("NOT");
             query = queryList[0].trim();
             String queryNot = queryList[1].trim();
-            Query mustNotQuery = MatchQuery.of(q -> q.field("content").query(queryNot))._toQuery();
+
+            Query mustNotQuery = generateMultiMatchQuery(queryNot, "title", "content");;
             boolQuery.mustNot(mustNotQuery);
         }
 
@@ -274,9 +292,7 @@ public class EsClient {
 
                 List<Query> mustQueriesAND = new ArrayList<>();
                 for (String string : arrayWithAND) {
-                    Query matchPhraseQuery = MatchQuery.of(
-                            m -> m.field("content").query(string)
-                    )._toQuery();
+                    Query matchPhraseQuery = generateMultiMatchQuery(string, "title", "content");
 
                     mustQueriesAND.add(matchPhraseQuery);
                 }
@@ -292,8 +308,7 @@ public class EsClient {
                 boolQuery.should(shouldQueriesOR);
             }
         } else {
-            String finalQuery = query;
-            Query matchQuery = MatchQuery.of(q -> q.field("content").query(finalQuery))._toQuery();
+            Query matchQuery = generateMultiMatchQuery(query, "title", "content");
             boolQuery.must(matchQuery);
         }
 
@@ -303,9 +318,7 @@ public class EsClient {
         List<Query> shouldQueriesOR = new ArrayList<>();
 
         for (String term : queryOR) {
-            Query matchQuery = MatchQuery.of(
-                    m -> m.field("content").query(term.trim())
-            )._toQuery();
+            Query matchQuery = generateMultiMatchQuery(term.trim(), "title", "content");
 
             shouldQueriesOR.add(matchQuery);
         }
@@ -321,7 +334,7 @@ public class EsClient {
                         .field("content")
                         .size(1)
                         .highlight(h -> h
-                                .preTag("<strong><em>")
-                                .postTag("</em></strong>")))));
+                                .preTag("")
+                                .postTag("")))));
     }
 }
