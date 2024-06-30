@@ -3,6 +3,7 @@ package com.elasticsearch.search.service;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.Suggestion;
+import co.elastic.clients.elasticsearch.core.search.TermSuggestOption;
 import com.elasticsearch.search.api.model.QueryParameter;
 import com.elasticsearch.search.api.model.Result;
 import com.elasticsearch.search.api.model.ResultList;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,7 +75,8 @@ public class SearchService {
         int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
         int totalPages = (int) Math.ceil((double) totalHits / EsClient.PAGE_SIZE);
         var searchTime = (int) searchResponse.took();
-        String suggest = getSuggestion(searchResponse);
+//        String suggest = getSuggestion(searchResponse);
+        String sugestion = generatePhraseSuggestion(searchResponse, queryParameter.getQuery());
         List<Hit<ObjectNode>> hits = hitsList.hits();
 
         var results = generateResultsList(hits);
@@ -84,7 +87,7 @@ public class SearchService {
                 .searchTime(searchTime)
                 .totalHits(totalHits)
                 .totalPages(totalPages)
-                .suggestion(suggest)
+                .suggestion(sugestion)
                 .results(results)
                 .currentPage(currentPage);
     }
@@ -120,6 +123,36 @@ public class SearchService {
             return "";
 
         return suggestionList.get(0).text();
+    }
+
+    private String generatePhraseSuggestion(SearchResponse searchResponse, String originalQuery) {
+        Map<String, List<Suggestion>> suggestion = searchResponse.suggest();
+
+        List<Suggestion> suggestionList = suggestion.get("suggest_term");
+
+        if (Objects.isNull(suggestionList) || suggestionList.isEmpty()) {
+            return "";
+        }
+
+        String[] originalQuerySplit = originalQuery.split(" ");
+
+        int numberOfOptions = 0;
+
+        for (int i = 0; i < suggestionList.size(); i++) {
+            List<TermSuggestOption> options = suggestionList.get(i).term().options();
+
+            if (!options.isEmpty()) {
+                String text = options.get(0).text();
+                originalQuerySplit[i] = text;
+                numberOfOptions++;
+            }
+        }
+
+        if (numberOfOptions == 0) {
+            return "";
+        }
+
+        return String.join(" ", originalQuerySplit);
     }
 
     private boolean isFavoriteHit(String hitId) {

@@ -127,7 +127,8 @@ public class EsClient {
         SearchResponse<ObjectNode> response;
         Integer currentPage = (PAGE_SIZE * (pageNumber - 1));
 
-        Suggester phraseSuggestion = getPhraseSuggestion(query);
+//        Suggester phraseSuggestion = getPhraseSuggestion(query);
+        Suggester phraseSuggestion = generateTermSuggestion(query);
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
 
@@ -351,5 +352,15 @@ public class EsClient {
                             .highlight(h -> h
                                     .preTag("<strong><em>")
                                     .postTag("</strong></em>")))));
+    }
+
+    private Suggester generateTermSuggestion(String query) {
+        return Suggester.of(s -> s
+                .suggesters("suggest_term", ts -> ts
+                        .text(query)
+                        .term(t -> t
+                                .field("content")
+                                .size(1)
+                                .minWordLength(2))));
     }
 }
