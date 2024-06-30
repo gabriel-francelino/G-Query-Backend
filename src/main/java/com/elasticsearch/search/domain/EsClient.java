@@ -9,7 +9,6 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Highlight;
 import co.elastic.clients.elasticsearch.core.search.HighlightField;
-import co.elastic.clients.elasticsearch.core.search.SourceConfig;
 import co.elastic.clients.elasticsearch.core.search.Suggester;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
@@ -277,7 +276,7 @@ public class EsClient {
             query = queryList[0].trim();
             String queryNot = queryList[1].trim();
 
-            Query mustNotQuery = generateMultiMatchQuery(queryNot, "title", "content");;
+            Query mustNotQuery = generateMultiMatchQuery(queryNot, "title", "content");
             boolQuery.mustNot(mustNotQuery);
         }
 
