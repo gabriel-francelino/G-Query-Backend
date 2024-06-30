@@ -38,8 +38,8 @@ public class SearchController implements SearchApi {
     }
 
     @Override
-    public CompletableFuture<ResponseEntity<ResultList>> searchFavorites() {
-        var result = searchService.searchFavorites();
+    public CompletableFuture<ResponseEntity<ResultList>> searchFavorites(Integer pageNumber) {
+        var result = searchService.searchFavorites(pageNumber);
         return CompletableFuture.supplyAsync(() -> ResponseEntity.ok(result));
     }
 }

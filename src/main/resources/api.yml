@@ -11,6 +11,12 @@ paths:
       operationId: searchFavorites
       tags:
         - searchFavorites
+      parameters:
+        - name: pageNumber
+          description: Number of current page
+          in: query
+          schema:
+            type: integer
       responses:
         200:
           description: OK

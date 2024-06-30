@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Highlight;
 import co.elastic.clients.elasticsearch.core.search.HighlightField;
+import co.elastic.clients.elasticsearch.core.search.SourceConfig;
 import co.elastic.clients.elasticsearch.core.search.Suggester;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
@@ -93,6 +94,19 @@ public class EsClient {
             elasticsearchClient.deleteByQuery(d -> d
                     .index("wikipedia_fav")
                     .query(matchQuery));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public SearchResponse searchFavorites(Integer pageNumber) {
+        pageNumber = Util.validatePageNumber(pageNumber);
+        Integer currentPage = (PAGE_SIZE * (pageNumber - 1));
+
+        try {
+            return elasticsearchClient.search(s -> s
+                    .index("wikipedia_fav")
+                    .from(currentPage), ObjectNode.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

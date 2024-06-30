@@ -32,8 +32,8 @@ public class SearchService {
         esClient.unfavoriteDocument(id);
     }
 
-    public ResultList searchFavorites() {
-        var searchResponse = esClient.searchFavorites();
+    public ResultList searchFavorites(Integer pageNumber) {
+        var searchResponse = esClient.searchFavorites(pageNumber);
 
         var hitsList = searchResponse.hits();
         int totalHits = (int) (hitsList.total() != null ? hitsList.total().value() : 0);
@@ -56,10 +56,13 @@ public class SearchService {
                 }
         ).collect(Collectors.toList());
 
+        int currentPage = pageNumber != null ? pageNumber : 1;
+
         return new ResultList()
                 .searchTime(searchTime)
                 .totalHits(totalHits)
                 .totalPages(totalPages)
+                .currentPage(currentPage)
                 .results(results);
     }
 
