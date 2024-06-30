@@ -342,12 +342,14 @@ public class EsClient {
     private Suggester getPhraseSuggestion(String query) {
         return Suggester.of(s -> s
                 .suggesters("suggest_phrase", ts -> ts
-                .text(query)
-                .phrase(p -> p
-                        .field("content")
-                        .size(1)
-                        .highlight(h -> h
-                                .preTag("")
-                                .postTag("")))));
+                    .text(query)
+                    .phrase(p -> p
+                            .field("content")
+                            .size(1)
+                            .gramSize(3)
+                            .confidence(0.5)
+                            .highlight(h -> h
+                                    .preTag("<strong><em>")
+                                    .postTag("</strong></em>")))));
     }
 }

@@ -119,7 +119,7 @@ public class SearchService {
         if (suggestionList.isEmpty())
             return "";
 
-        return suggestionList.get(0).highlighted();
+        return suggestionList.get(0).text();
     }
 
     private boolean isFavoriteHit(String hitId) {
