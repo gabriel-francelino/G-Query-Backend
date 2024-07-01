@@ -1,20 +1,21 @@
+# Etapa de construção
 FROM ubuntu:latest AS build
 
-# Install java
-RUN apt-get update
-RUN apt-get install openjdk-17-jdk -y
+# Instalar dependências
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk \
+    docker.io \
+    curl \
+    maven
+
+# Copiar arquivos do projeto
 COPY . .
 
-# Install docker
-RUN apt-get install docker -y
-
-# Rodar o container do elastic
-RUN cd ./docker/ && docker-compose up -d
-RUN cd ./../
-
-# Install curl
-RUN apt-get install curl -y
-RUN curl -X PUT "localhost:9200/wikipedia" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'
+# Rodar o container do Elasticsearch
+WORKDIR /docker
+RUN docker-compose up -d && \
+    sleep 30 && \
+    curl -X PUT "localhost:9200/wikipedia" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'
     {
       "settings": {
         "index": {
@@ -63,8 +64,8 @@ RUN curl -X PUT "localhost:9200/wikipedia" -H 'Content-Type: application/json' -
           }
         }
       }
-    }'
-RUN curl -X PUT "localhost:9200/wikipedia_fav" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'
+    }' && \
+    curl -X PUT "localhost:9200/wikipedia_fav" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'
     {
       "settings": {
         "index": {
@@ -113,15 +114,20 @@ RUN curl -X PUT "localhost:9200/wikipedia_fav" -H 'Content-Type: application/jso
           }
         }
       }
-    }'
-curl -H "Content-Type: application/x-ndjson" -XPOST https://localhost:9200/wikipedia/_bulk --data-binary "@wiki.json" --user "elastic:user123" --insecure
+    }' && \
+    curl -H "Content-Type: application/x-ndjson" -XPOST "http://localhost:9200/wikipedia/_bulk" --data-binary "@wiki.json" --user "elastic:user123" --insecure
 
-# Install maven
-RUN apt-get install maven -y
+# Voltar ao diretório do projeto
+WORKDIR /../
+
+# Compilar o projeto com Maven
 RUN mvn clean install
 
+# Etapa final
 FROM openjdk:17-jdk-slim
 
+# Copiar o JAR compilado da etapa de construção
 COPY --from=build /target/*.jar app.jar
 
-CMD ["java", "-jar", "app.jar"]
+# Comando para rodar a aplicação
+ENTRYPOINT ["java", "-jar", "app.jar"]
