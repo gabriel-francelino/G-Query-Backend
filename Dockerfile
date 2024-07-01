@@ -6,14 +6,19 @@ RUN apt-get update && apt-get install -y \
     openjdk-17-jdk \
     docker.io \
     curl \
-    maven
+    maven \
+    python3-pip
+
+# Instalar docker-compose
+RUN pip3 install docker-compose
 
 # Copiar arquivos do projeto
 COPY . .
 
 # Rodar o container do Elasticsearch
 WORKDIR /docker
-RUN docker-compose up -d && \
+RUN service docker start && \
+    docker-compose up -d && \
     sleep 30 && \
     curl -X PUT "http://localhost:9200/wikipedia" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'\
     { \
