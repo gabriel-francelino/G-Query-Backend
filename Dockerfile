@@ -15,105 +15,105 @@ COPY . .
 WORKDIR /docker
 RUN docker-compose up -d && \
     sleep 30 && \
-    curl -X PUT "localhost:9200/wikipedia" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'
-    {
-      "settings": {
-        "index": {
-          "sort.field": [ "title", "reading_time", "dt_creation" ],
-          "sort.order": [ "asc", "asc", "asc" ]
-        },
-        "number_of_shards": 4,
-        "number_of_replicas": 1,
-        "index.mapping.coerce": false,
-        "analysis": {
-          "analyzer": {
-            "analyzer_for_content": {
-              "type": "custom",
-              "char_filter": [ ],
-              "tokenizer": "standard",
-              "filter": [
-                "asciifolding",
-                "lowercase",
-                "snowball"
-              ]
-            }
-          }
-        }
-      },
-      "mappings": {
-        "dynamic": "strict",
-        "properties": {
-          "title": {
-            "type": "text",
-            "analyzer": "analyzer_for_content"
-          },
-          "url": {
-            "type": "keyword",
-            "doc_values": false,
-            "index": false
-          },
-          "content": {
-            "type": "text",
-            "analyzer": "analyzer_for_content"
-          },
-          "dt_creation": {
-            "type": "date"
-          },
-          "reading_time": {
-            "type": "integer"
-          }
-        }
-      }
+    curl -X PUT "http://localhost:9200/wikipedia" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'\
+    { \
+      "settings": { \
+        "index": { \
+          "sort.field": [ "title", "reading_time", "dt_creation" ], \
+          "sort.order": [ "asc", "asc", "asc" ] \
+        }, \
+        "number_of_shards": 4, \
+        "number_of_replicas": 1, \
+        "index.mapping.coerce": false, \
+        "analysis": { \
+          "analyzer": { \
+            "analyzer_for_content": { \
+              "type": "custom", \
+              "char_filter": [ ], \
+              "tokenizer": "standard", \
+              "filter": [ \
+                "asciifolding", \
+                "lowercase", \
+                "snowball" \
+              ] \
+            } \
+          } \
+        } \
+      }, \
+      "mappings": { \
+        "dynamic": "strict", \
+        "properties": { \
+          "title": { \
+            "type": "text", \
+            "analyzer": "analyzer_for_content" \
+          }, \
+          "url": { \
+            "type": "keyword", \
+            "doc_values": false, \
+            "index": false \
+          }, \
+          "content": { \
+            "type": "text", \
+            "analyzer": "analyzer_for_content" \
+          }, \
+          "dt_creation": { \
+            "type": "date" \
+          }, \
+          "reading_time": { \
+            "type": "integer" \
+          } \
+        } \
+      } \
     }' && \
-    curl -X PUT "localhost:9200/wikipedia_fav" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'
-    {
-      "settings": {
-        "index": {
-          "sort.field": [ "title", "reading_time", "dt_creation" ],
-          "sort.order": [ "asc", "asc", "asc" ]
-        },
-        "number_of_shards": 4,
-        "number_of_replicas": 1,
-        "index.mapping.coerce": false,
-        "analysis": {
-          "analyzer": {
-            "analyzer_for_content": {
-              "type": "custom",
-              "char_filter": [ ],
-              "tokenizer": "standard",
-              "filter": [
-                "asciifolding",
-                "lowercase",
-                "snowball"
-              ]
-            }
-          }
-        }
-      },
-      "mappings": {
-        "dynamic": "strict",
-        "properties": {
-          "title": {
-            "type": "text",
-            "analyzer": "analyzer_for_content"
-          },
-          "url": {
-            "type": "keyword",
-            "doc_values": false,
-            "index": false
-          },
-          "content": {
-            "type": "text",
-            "analyzer": "analyzer_for_content"
-          },
-          "dt_creation": {
-            "type": "date"
-          },
-          "reading_time": {
-            "type": "integer"
-          }
-        }
-      }
+    curl -X PUT "http://localhost:9200/wikipedia_fav" -H 'Content-Type: application/json' --user "elastic:user123" --insecure -d'\
+    { \
+      "settings": { \
+        "index": { \
+          "sort.field": [ "title", "reading_time", "dt_creation" ], \
+          "sort.order": [ "asc", "asc", "asc" ] \
+        }, \
+        "number_of_shards": 4, \
+        "number_of_replicas": 1, \
+        "index.mapping.coerce": false, \
+        "analysis": { \
+          "analyzer": { \
+            "analyzer_for_content": { \
+              "type": "custom", \
+              "char_filter": [ ], \
+              "tokenizer": "standard", \
+              "filter": [ \
+                "asciifolding", \
+                "lowercase", \
+                "snowball" \
+              ] \
+            } \
+          } \
+        } \
+      }, \
+      "mappings": { \
+        "dynamic": "strict", \
+        "properties": { \
+          "title": { \
+            "type": "text", \
+            "analyzer": "analyzer_for_content" \
+          }, \
+          "url": { \
+            "type": "keyword", \
+            "doc_values": false, \
+            "index": false \
+          }, \
+          "content": { \
+            "type": "text", \
+            "analyzer": "analyzer_for_content" \
+          }, \
+          "dt_creation": { \
+            "type": "date" \
+          }, \
+          "reading_time": { \
+            "type": "integer" \
+          } \
+        } \
+      } \
     }' && \
     curl -H "Content-Type: application/x-ndjson" -XPOST "http://localhost:9200/wikipedia/_bulk" --data-binary "@wiki.json" --user "elastic:user123" --insecure
 
