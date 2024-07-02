@@ -13,7 +13,8 @@ Bem-vindo à documentação do projeto backend final da disciplina de elasticsea
 5. [Filtros e Parâmetros de Query](#filtros-e-parâmetros-de-query)
 6. [Exemplos de Uso](#exemplos-de-uso)
 7. [Retorno das APIs](#retorno-das-apis)
-8. [Colaboradores](#colaboradores)
+8. [Como Executar](#como-executar)
+9. [Colaboradores](#colaboradores)
 
 ---
 
@@ -143,6 +144,33 @@ Retorna uma string informando que o documento foi favoritado ou desfavoritado.
 
 ---
 Este projeto oferece uma solução robusta e eficiente para buscas avançadas em documentos utilizando Elasticsearch. Com uma variedade de funcionalidades e filtros, ele se adapta às necessidades de diferentes tipos de consultas e oferece uma interface amigável para usuários finais.
+
+#### **Como executar**
+
+Para executar o projeto, é necessário ter o Java 17, Maven e Docker instados instalados. Em seguida, basta seguir os seguintes comandos:
+
+1. Clone o repositório:
+    ```bash
+    git clone https://github.com/gabriel-francelino/G-Query-Backend.git
+    ```
+
+2. Execute os containers do Elasticsearch:
+    ```bash
+    cd ./docker/
+    ```
+    ```bash
+    docker compose up -d
+    ```
+    Obs: Caso deseje parar os containers, execute o comando `docker compose down`.
+
+
+3. Execute o projeto:
+    ```bash
+    cd ..
+    ```
+    ```bash
+    mvn spring-boot:run
+    ```
 
 #### **Colaboradores**
 
